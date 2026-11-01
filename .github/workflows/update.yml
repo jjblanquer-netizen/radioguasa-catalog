@@ -1,0 +1,27 @@
+name: Actualizar catálogo
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # cada día a las 03:17 UTC
+  workflow_dispatch: {}     # también a mano desde la pestaña Actions
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Descargar catálogo
+        run: python build_catalog.py
+      - name: Guardar cambios
+        run: |
+          git config user.name "radioguasa-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs
+          git diff --cached --quiet || git commit -m "Catálogo actualizado"
+          git push
